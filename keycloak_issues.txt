@@ -28,3 +28,11 @@
 					</dependency>
 				</dependencies>
 			</dependencyManagement>
+
+
+6 - Baixar o Adapter também!!!!
+
+	Para instalar o Adapter
+	https://www.keycloak.org/docs/latest/securing_apps/index.html#_jboss_adapter
+	
+	Terminar de ajustar o adapter.
