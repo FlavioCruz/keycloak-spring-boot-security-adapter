@@ -1,0 +1,30 @@
+1 - Ao enviar a requisição de token (POST: http://localhost:8080/auth/realms/{nome do realm}/protocol/openid-connect/token) de acesso e refresh, se atentar ao header da requisição
+	application/json falha ao enviar
+    Portanto enviar como:
+	application/x-www-form-urlencoded
+
+2 - Lembrar de trocar realm na chamada da requisição acima.
+
+3 - Ao configurar usuário, atentar ao campo de senha temporária. Caso esteja ativo, não tem como usar a requisição para gerar os tokens de acesso e refresh.
+
+4 - Configurar o application.properties
+			server.port=PORTA_DO_CLIENTE
+			keycloak.auth-server-url=http://localhost:8080/auth
+			keycloak.realm=NOME_REALM_KEYCLOAK
+			keycloak.resource=ID_CLIENTE_NO_KEYCLOAK
+			keycloak.public-client=true   #valores[false(default), true, confidential]
+			keycloak.security-constraints[0].authRoles[0]=ROLE_NO_KEYCLOAK_COM_ACESSO
+			keycloak.security-constraints[0].securityCollections[0].patterns[0]=INDICA QUAL PATHS SERÃO "FILTRADOS"
+
+5 - Para spring-boot 2.x.x tem que usar a versão 4.2.0 
+ 			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.keycloak.bom</groupId>
+						<artifactId>keycloak-adapter-bom</artifactId>
+				==========>	<version>4.2.0.Final</version>   <==========
+						<type>pom</type>
+						<scope>import</scope>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
