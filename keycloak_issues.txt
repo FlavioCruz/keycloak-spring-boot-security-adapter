@@ -1,3 +1,6 @@
+Pré configuração - https://medium.com/@bcarunmail/securing-rest-api-using-keycloak-and-spring-oauth2-6ddf3a1efcc2
+		   Como gerenciar usuários, clientes, papéis e realms no Keycloak
+
 1 - Ao enviar a requisição de token (POST: http://localhost:8080/auth/realms/{nome do realm}/protocol/openid-connect/token) de acesso e refresh, se atentar ao header da requisição
 	application/json falha ao enviar
     Portanto enviar como:
@@ -8,15 +11,85 @@
 3 - Ao configurar usuário, atentar ao campo de senha temporária. Caso esteja ativo, não tem como usar a requisição para gerar os tokens de acesso e refresh.
 
 4 - Configurar o application.properties
+			TODOS OS VALORES ABAIXO PODEM NÃO ESTAR CORRETOS.
+			VERIFICAR SUA APLICAÇÃO
+			
+			#Configuração do Spring Security
+			# Can be set to false to disable security during local development
+			rest.security.enabled=true
+			rest.security.api-matcher=/api/**
+			rest.security.cors.allowed-origins=*
+			rest.security.cors.allowed-headers=*
+			rest.security.cors.allowed-methods=GET,POST,PUT,PATCH,DELETE,OPTIONS
+			rest.security.cors.max-age=3600
+
+			#Configuração de porta do cliente
 			server.port=PORTA_DO_CLIENTE
+			
+			#Configuração do Keycloak
 			keycloak.auth-server-url=http://localhost:8080/auth
 			keycloak.realm=NOME_REALM_KEYCLOAK
 			keycloak.resource=ID_CLIENTE_NO_KEYCLOAK
 			keycloak.public-client=true   #valores[false(default), true, confidential]
 			keycloak.security-constraints[0].authRoles[0]=ROLE_NO_KEYCLOAK_COM_ACESSO
 			keycloak.security-constraints[0].securityCollections[0].patterns[0]=INDICA QUAL PATHS SERÃO "FILTRADOS"
+			
+			#Configuração do Spring OAuth2 Resource Server
+			rest.security.issuer-uri=http://localhost:8080/auth/realms/dev
+			security.oauth2.resource.id=employee-service
+			security.oauth2.resource.token-info-uri=${rest.security.issuer-uri}/protocol/openid-connect/token/introspect
+			security.oauth2.resource.user-info-uri=${rest.security.issuer-uri}/protocol/openid-connect/userinfo
+			#********************************
+			o valor da chave pode ser copiado da chave pública no realm
+			Esse valor é o que usa o JwtAccessTokenCustomizer
+			security.oauth2.resource.jwt.key-value=-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhWOcKAVAwt+5FF/eE2hLaMVD5zQBBr+RLdc7HFUrlvU9Pm548rnD+zRTfOhnl5b6qMjtpLTRe3fG+8chjPwQriRyFKCzg7eYNxuR/2sK4okJbfQSZFs16TFhXtoQW5tWnzK6PqcB2Bpmy3x7QN78Hi04CjNrPz2BX8U+5BYMavYJANpp4XzPE8fZxlROmSSyNeyJdW30rJ/hsWZJ5nnxSZ685eT4IIUHM4g+sQQTZxnCUnazNXng5B5yZz/sh+9GOXDGT286fWdGbhGKU8oujjSJLOHYewFZX5Jw8aMrKKspL/6glRLSiV8FlEHbeRWxFffjZs/D+e9A56XuRJSQ9QIDAQAB\n-----END PUBLIC KEY-----
+			
 
-5 - Para spring-boot 2.x.x tem que usar a versão 4.2.0 
+5 - Configurar o pom.xml
+			<parent>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-parent</artifactId>
+				<version>2.0.1.RELEASE</version>
+				<!-- Verificar o motivo desta linha e sua relação com o projeto -->
+				<!-- To address this directory structure (or any other directory structure), we would have to add the <relativePath> element to our parent section. -->
+				
+				
+			<!-- *********************************** USO *********************************
+			<project>
+				<parent>
+					<groupId>com.mycompany.app</groupId>
+					<artifactId>my-app</artifactId>
+					<version>1</version>
+					<relativePath>../parent/pom.xml</relativePath>
+				</parent>
+				<modelVersion>4.0.0</modelVersion>
+				<artifactId>my-module</artifactId>
+			</project>
+			************************************************************************* -->
+			
+			
+				<relativePath/> <!-- lookup parent from repository -->
+			</parent>
+			
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-security</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security.oauth.boot</groupId>
+				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
+				<version>2.0.1.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+			</dependency>
+
+6 - Para spring-boot 2.x.x tem que usar a versão 4.2.0 
  			<dependencyManagement>
 				<dependencies>
 					<dependency>
@@ -30,7 +103,7 @@
 			</dependencyManagement>
 
 
-6 - Baixar o Adapter também!!!!
+7 - Baixar o Adapter também!!!!
 
 	Para instalar o Adapter
 	https://www.keycloak.org/docs/latest/securing_apps/index.html#_jboss_adapter
