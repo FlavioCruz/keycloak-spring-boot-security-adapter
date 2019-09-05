@@ -7,6 +7,7 @@ Pré configuração - https://medium.com/@bcarunmail/securing-rest-api-using-key
 	application/x-www-form-urlencoded
 
 2 - Lembrar de trocar realm na chamada da requisição acima.
+    2.1 - Client deve ter access-type setado para confidential para poder acessar o secret
 
 3 - Ao configurar usuário, atentar ao campo de senha temporária. Caso esteja ativo, não tem como usar a requisição para gerar os tokens de acesso e refresh.
 
