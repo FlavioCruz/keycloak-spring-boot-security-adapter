@@ -103,6 +103,9 @@ public class SecurityConfigurer extends ResourceServerConfigurerAdapter {
 
         //Prepare by getting access token once
         oAuth2RestTemplate.getAccessToken();
+
+        LOG.info("AccessToken -> {}", oAuth2RestTemplate.getAccessToken().getValue());
+
         return oAuth2RestTemplate;
     }
 
