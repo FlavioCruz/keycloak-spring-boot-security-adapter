@@ -1,0 +1,93 @@
+#server:
+#  port: 8081
+#
+#  #configuração
+#rest:
+#  security:
+#    enabled: true
+#    api-matcher: /api/**
+#    issuer-uri: ${keycloak.server.base-url}/${keycloak.realm.name}
+#
+#  #Para casos onde se precisa acessar outras aplicações seguradas
+#spring:
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          SpringBootKeycloak:
+#            client-id: ${keycloak.realm.client.client-id}
+#            client-name: Login App
+#            client-secret: ${keycloak.realm.client.secret}
+#            provider: keycloak
+#            authorization-grant-type: client_credentials
+#security:
+#    oauth2:
+#      client:
+#        client-id: ${keycloak.realm.client.client-id}
+#        client-secret: ${keycloak.realm.client.secret}
+#  #authorization_endpoint
+#        user-authorization-uri: ${rest.security.issuer-uri}/protocol/openid-connect/auth
+#  #token_endpoint
+#        access-token-uri: ${rest.security.issuer-uri}/protocol/openid-connect/token
+#        scope: openid, profile
+#        grant-type: ${keycloak.realm.client.grant-type}
+#        authorization-grant-type: authorization_code
+#  #---------------
+#  #no caso de uso do keycloak, o resource-id é o client-id
+#      resource.id: ${keycloak.realm.client.client-id}
+#  #token_introspection_endpoint
+#      token-info-uri: ${rest.security.issuer-uri}/protocol/openid-connect/token/introspect
+#  #userinfo_endpoint
+#      user-info-uri: ${rest.security.issuer-uri}/protocol/openid-connect/userinfo
+#  #key_value
+#      jwt:
+#        key-value: ${keycloak.realm.client.key-value}
+#
+#  #keycloak server configurations
+#keycloak:
+#  server:
+#    base-url: http://localhost:8080/auth/realms
+#  realm:
+#    name: SpringBootKeycloak
+#    client:
+#      client-id: login-app
+#      grant-type: client_credentials
+#      secret: 61b4bff5-328f-4811-99ad-32cc06476d13
+#      key-value: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgkeycloakAQEAiD5XxI7q/s/Ml/t9ZwecIpxqOZjMHZVdvzcIasHt8UFHrm+R8t1AnEF8FPzXbrB9P3wafWKaA0bTaWTF6dDivn+SpJcw+87qRQ3ids4Vyf620hVXTsxNKPkx1xeqRtWxRUbWgvKdg7pe4F5Tu+5F3PYMhq3i0b6kYfU2vEw0YKVuSFANST1I45WZndm4dgVgfrIH9dEquHpqmQyHy1bDWOU0OrzlKZy5SHYRJ+ehP5KK+w+mSaiW0YjvLkV40i8BLr8Bqof4pdItUQdQslpfiT0Nk3uF1QqHneVFDgxE1C+gHbbmyxw4Md3whksxg2B+GgXPcRukqwiwPQlKRZsHnwIDAQAB
+#
+
+
+
+
+server:
+  port: 8081
+
+keycloak:
+#  base-url: http://200.20.1.158:8080/auth
+  base-url: http://localhost:8080/auth
+  realm: SpringBootKeycloak
+  realm-url: ${keycloak.base-url}/realms/${keycloak.realm}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          SpringBootKeycloak:
+            client-id: login-app
+            client-name: Login App
+            client-secret: 61b4bff5-328f-4811-99ad-32cc06476d13
+            provider: keycloak
+            authorization-grant-type: authorization_code
+            scope: openid, profile
+            redirect-uri-template: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            authorization-uri: ${keycloak.realm-url}/protocol/openid-connect/auth
+            jwk-set-uri: ${keycloak.realm-url}/protocol/openid-connect/certs
+            token-uri: ${keycloak.realm-url}/protocol/openid-connect/token
+            # would be cool if there was a end-session-uri to propagate logouts
+
+            #  User info endpoint not needed since Keycloak uses self-contained value tokens
+            #            user-info-uri: ${keycloak.realm-url}/protocol/openid-connect/userinfo
+            user-name-attribute: preferred_username
