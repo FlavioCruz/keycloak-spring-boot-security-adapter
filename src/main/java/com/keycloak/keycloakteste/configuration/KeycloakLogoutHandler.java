@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Slf4j
 @RequiredArgsConstructor
-class KeycloakLogoutHandler extends SecurityContextLogoutHandler {
+public class KeycloakLogoutHandler extends SecurityContextLogoutHandler {
 
     private final RestTemplate restTemplate;
 

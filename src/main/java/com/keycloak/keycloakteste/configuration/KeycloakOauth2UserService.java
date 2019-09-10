@@ -1,10 +1,11 @@
 package com.keycloak.keycloakteste.configuration;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -15,7 +16,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.stereotype.Component;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -26,15 +27,22 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-@RequiredArgsConstructor
-@Component
-class KeycloakOauth2UserService extends OidcUserService {
+public class KeycloakOauth2UserService extends OidcUserService {
 
     private final OAuth2Error INVALID_REQUEST = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
 
-    private final JwtDecoder jwtDecoder;
+    private JwtDecoder jwtDecoder;
 
-    private final GrantedAuthoritiesMapper authoritiesMapper;
+    private GrantedAuthoritiesMapper authoritiesMapper;
+
+    public KeycloakOauth2UserService(OAuth2ClientProperties oauth2ClientProperties){
+        this.jwtDecoder = new NimbusJwtDecoderJwkSupport(oauth2ClientProperties.getProvider().get("keycloak").getJwkSetUri());
+
+        SimpleAuthorityMapper authoritiesMapper = new SimpleAuthorityMapper();
+        authoritiesMapper.setConvertToUpperCase(true);
+        this.authoritiesMapper = authoritiesMapper;
+
+    }
 
     /**
      * Augments {@link OidcUserService#loadUser(OidcUserRequest)} to add authorities

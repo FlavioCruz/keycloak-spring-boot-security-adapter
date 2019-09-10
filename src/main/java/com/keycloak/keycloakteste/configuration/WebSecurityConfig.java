@@ -26,11 +26,11 @@ import static org.springframework.security.oauth2.client.web.OAuth2Authorization
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 //@ConditionalOnBean(value = RestTemplate.class)
 @Slf4j
-class WebSecurityConfig extends WebSecurityConfigurerAdapter{
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     private KeycloakLogoutHandler keycloakLogoutHandler = keycloakLogoutHandler();
     @Autowired
-    KeycloakOauth2UserService keycloakOidcUserService;
+    private KeycloakOauth2UserService keycloakOidcUserService;
 
     @Value("${keycloak.realm}") private String realm;
 
@@ -50,7 +50,7 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                         // Aqui pode ser configuradas rotas específicas ou deixar passar tudo
                         .authorizeRequests().anyRequest().permitAll().and()
                         // Utiliza o logout do Keycloak
-                        .logout().addLogoutHandler(keycloakLogoutHandler).and()
+//                        .logout().addLogoutHandler(keycloakLogoutHandler).and()
                         // Habilita o OAuth 2 do Spring
                         .oauth2Login().userInfoEndpoint().oidcUserService(keycloakOidcUserService).and()
                         // Redireciona a página de login para a do Keycloak
@@ -60,12 +60,7 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 //    }
 
     public KeycloakOauth2UserService keycloakOidcUserService(OAuth2ClientProperties oauth2ClientProperties) {
-        JwtDecoder jwtDecoder = jwtDecoder(oauth2ClientProperties);
-
-        SimpleAuthorityMapper authoritiesMapper = new SimpleAuthorityMapper();
-        authoritiesMapper.setConvertToUpperCase(true);
-
-        return new KeycloakOauth2UserService(jwtDecoder, authoritiesMapper);
+        return new KeycloakOauth2UserService(oauth2ClientProperties);
     }
 
     public KeycloakLogoutHandler keycloakLogoutHandler() {
@@ -74,9 +69,5 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     public RestTemplate restTemplate() {
         return new RestTemplate();
-    }
-
-    public JwtDecoder jwtDecoder(OAuth2ClientProperties oauth2ClientProperties) {
-        return new NimbusJwtDecoderJwkSupport(oauth2ClientProperties.getProvider().get("keycloak").getJwkSetUri());
     }
 }
