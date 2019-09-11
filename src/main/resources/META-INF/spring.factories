@@ -1,6 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.keycloak.keycloakteste.configuration.WebSecurityConfig,\
-com.keycloak.keycloakteste.configuration.KeycloakOauth2UserService
-#,\
-#com.keycloak.keycloakteste.configuration.KeycloakLogoutHandler,\
-#org.springframework.web.client.RestTemplate
+com.keycloak.keycloakteste.configuration.KeycloakOauth2UserService,\
+com.keycloak.keycloakteste.configuration.KeycloakLogoutHandler,\
+org.springframework.web.client.RestTemplate
