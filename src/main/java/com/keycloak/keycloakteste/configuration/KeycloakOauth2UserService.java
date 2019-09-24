@@ -41,7 +41,6 @@ public class KeycloakOauth2UserService extends OidcUserService {
         SimpleAuthorityMapper authoritiesMapper = new SimpleAuthorityMapper();
         authoritiesMapper.setConvertToUpperCase(true);
         this.authoritiesMapper = authoritiesMapper;
-
     }
 
     /**

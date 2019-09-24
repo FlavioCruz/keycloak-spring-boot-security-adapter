@@ -4,9 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
+		<artifactId>spring-boot-dependencies</artifactId>
 		<version>2.1.7.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.keycloak</groupId>
 	<artifactId>keycloak-teste</artifactId>
@@ -15,7 +14,11 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<sti-spring-boot-base.version>1.1.9</sti-spring-boot-base.version>
 	</properties>
 
 	<dependencies>
@@ -58,12 +61,6 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
@@ -80,24 +77,12 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-
 <!--		solução no stackoverflow para a exception no JAXB-API e ContextLoader-->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.3.0-b170201.1204</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
-			<version>3.0.4.RELEASE</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>javax.xml.bind</groupId>-->
+<!--			<artifactId>jaxb-api</artifactId>-->
+<!--			<version>2.3.0-b170201.1204</version>-->
+<!--		</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
 		<dependency>
@@ -115,62 +100,70 @@
 
 	</dependencies>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>br.uff.sti</groupId>
+				<artifactId>sti-spring-boot-base</artifactId>
+				<version>${sti-spring-boot-base.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<build>
-
-		<finalName>keycloak-adapter</finalName>
-		<directory>target</directory>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>src/main/java</directory>
-			</resource>
-		</resources>
-		<sourceDirectory>src/main/java</sourceDirectory>
-		<testSourceDirectory>src/test/java</testSourceDirectory>
-
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
+			<!-- está dando bug no teste com a versão java 8b181. No futuro deve poder retirar isto-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
+					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
 			</plugin>
-
-			<plugin>  <!-- need this blurb to build a *runnable* jar -->
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.1.1</version>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<!--
+				https://stackoverflow.com/questions/2580969/how-do-i-exclude-the-sources-jar-in-mvn-deploy/31439456
+				evita enviar o código fonte para o nexus
+				-->
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>src/main/java/com/keycloak/keycloakteste/KeycloakTesteApplication.java</mainClass>
-						</manifest>
-					</archive>
+					<skipSource>true</skipSource>
 				</configuration>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<!-- Restrict execution of source compilation to install or deploy. -->
+						<!-- The default is package. -->
+						<phase>install</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>repo-uff-cache</id>
+			<name>Repositório da STI/UFF</name>
+			<url>https://app.sti.uff.br/nexus/repository/maven-cache</url>
+		</repository>
+		<repository>
+			<id>repo-uff</id>
+			<name>Repositório da STI/UFF</name>
+			<url>https://app.sti.uff.br/nexus/repository/maven-sti</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 </project>

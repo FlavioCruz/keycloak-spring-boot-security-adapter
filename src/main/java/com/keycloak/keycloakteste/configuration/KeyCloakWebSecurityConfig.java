@@ -21,53 +21,38 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
-@Configuration
-@AutoConfigureAfter(value = WebMvcAutoConfiguration.class)
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-//@ConditionalOnBean(value = RestTemplate.class)
 @Slf4j
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
+public class KeyCloakWebSecurityConfig extends WebSecurityConfigurerAdapter{
 
-    private KeycloakLogoutHandler keycloakLogoutHandler = keycloakLogoutHandler();
     @Autowired
     private KeycloakOauth2UserService keycloakOidcUserService;
+    @Autowired
+    private KeycloakProperties keycloakProperties;
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
 
-    @Value("${keycloak.realm}") private String realm;
-
-//    public WebSecurityConfigurerAdapter webSecurityConfigurer( //
-//                               @Value("${keycloak.realm}") String realm, //
-//                               KeycloakOauth2UserService keycloakOidcUserService, //
-//                               KeycloakLogoutHandler keycloakLogoutHandler //
-//    ) {
-//        return new WebSecurityConfigurerAdapter() {
-            @Override
-            public void configure(HttpSecurity http) throws Exception {
-
-                http
-                        //Configura o gerenciamento da sessão conforme suas necessidades.
-                        // I need this as a basis for a classic, server side rendered application
-                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
-                        // Aqui pode ser configuradas rotas específicas ou deixar passar tudo
-                        .authorizeRequests().anyRequest().permitAll().and()
-                        // Utiliza o logout do Keycloak
+        http
+                //Configura o gerenciamento da sessão conforme suas necessidades.
+                // I need this as a basis for a classic, server side rendered application
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
+                // Aqui pode ser configuradas rotas específicas ou deixar passar tudo
+                .authorizeRequests().anyRequest().permitAll().and()
+                // Utiliza o logout do Keycloak
 //                        .logout().addLogoutHandler(keycloakLogoutHandler).and()
-                        // Habilita o OAuth 2 do Spring
-                        .oauth2Login().userInfoEndpoint().oidcUserService(keycloakOidcUserService).and()
-                        // Redireciona a página de login para a do Keycloak
-                        .loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + realm);
-            }
-//        };
-//    }
+                // Habilita o OAuth 2 do Spring
+                .oauth2Login().userInfoEndpoint().oidcUserService(keycloakOidcUserService).and()
+                // Redireciona a página de login para a do Keycloak
+                .loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + keycloakProperties.getRealm())
+                // Redireciona para a página de logout do Keycloak
+                .and().logout().addLogoutHandler(keycloakLogoutHandler());
+    }
 
     public KeycloakOauth2UserService keycloakOidcUserService(OAuth2ClientProperties oauth2ClientProperties) {
         return new KeycloakOauth2UserService(oauth2ClientProperties);
     }
 
     public KeycloakLogoutHandler keycloakLogoutHandler() {
-        return new KeycloakLogoutHandler(restTemplate());
+        return new KeycloakLogoutHandler(keycloakProperties.getRealmUrl());
     }
 
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 }
