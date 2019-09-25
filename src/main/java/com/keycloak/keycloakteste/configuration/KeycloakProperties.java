@@ -1,3 +1,23 @@
+/**
+ *
+ * @author FlavioCruz
+ *
+ * This class looks for the base configuration for the keycloak server
+ * within the 'keycloak' prefix over the configuration file.
+ *
+ * e.g.
+ *      application.properties
+ *      keycloak.base-url=http://www.example.com/
+ *      keycloak.real=RealmName
+ *
+ *      application.yml
+ *      keycloak:
+ *          base-url: http://www.example.com/
+ *          realm: RealmName
+ */
+
+
+
 package com.keycloak.keycloakteste.configuration;
 
 import lombok.Getter;

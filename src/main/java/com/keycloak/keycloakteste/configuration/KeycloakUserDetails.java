@@ -1,3 +1,11 @@
+/**
+ * @author FlavioCruz
+ *
+ * This class aims to simulate the logged user and
+ * keeps the OidcIdToken
+ */
+
+
 package com.keycloak.keycloakteste.configuration;
 
 import lombok.Getter;

@@ -33,12 +33,9 @@ public class KeyCloakWebSecurityConfig extends WebSecurityConfigurerAdapter{
 
         http
                 //Configura o gerenciamento da sessão conforme suas necessidades.
-                // I need this as a basis for a classic, server side rendered application
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
                 // Aqui pode ser configuradas rotas específicas ou deixar passar tudo
                 .authorizeRequests().anyRequest().permitAll().and()
-                // Utiliza o logout do Keycloak
-//                        .logout().addLogoutHandler(keycloakLogoutHandler).and()
                 // Habilita o OAuth 2 do Spring
                 .oauth2Login().userInfoEndpoint().oidcUserService(keycloakOidcUserService).and()
                 // Redireciona a página de login para a do Keycloak

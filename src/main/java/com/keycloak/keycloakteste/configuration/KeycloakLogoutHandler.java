@@ -35,7 +35,11 @@ public class KeycloakLogoutHandler extends SecurityContextLogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         super.logout(request, response, authentication);
         try {
-            Field tokenField = authentication.getPrincipal().getClass()
+
+            // I MUST have the OidcIdToken field named as 'idToken' so i don't have to deal with
+            // Different objects nested on authentication.getPrincipal()
+            Field tokenField = authentication.getPrincipal()
+                    .getClass()
                     .getDeclaredField("idToken");
             tokenField.setAccessible(true);
             OidcIdToken token = (OidcIdToken) tokenField.get(authentication.getPrincipal());
