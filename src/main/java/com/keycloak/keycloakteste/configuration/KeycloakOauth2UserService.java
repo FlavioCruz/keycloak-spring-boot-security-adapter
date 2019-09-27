@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -25,22 +26,35 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
-public class KeycloakOauth2UserService extends OidcUserService {
+public class KeycloakOauth2UserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
     private final OAuth2Error INVALID_REQUEST = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
+
+    private OidcUserService oidcUserService;
 
     private JwtDecoder jwtDecoder;
 
     private GrantedAuthoritiesMapper authoritiesMapper;
 
-    public KeycloakOauth2UserService(OAuth2ClientProperties oauth2ClientProperties){
-        this.jwtDecoder = new NimbusJwtDecoderJwkSupport(oauth2ClientProperties.getProvider().get("keycloak").getJwkSetUri());
+    private List<ApplicationAuthoritiesProvider> applicationAuthoritiesProviders;
+
+    public KeycloakOauth2UserService(OAuth2ClientProperties oauth2ClientProperties, OidcUserService oidcUserService, List<ApplicationAuthoritiesProvider> applicationAuthoritiesProviders){
+        this.jwtDecoder = new NimbusJwtDecoderJwkSupport(
+                oauth2ClientProperties
+                        .getProvider()
+                        .get("keycloak")
+                        .getJwkSetUri()
+        );
+        this.applicationAuthoritiesProviders = applicationAuthoritiesProviders;
 
         SimpleAuthorityMapper authoritiesMapper = new SimpleAuthorityMapper();
         authoritiesMapper.setConvertToUpperCase(true);
         this.authoritiesMapper = authoritiesMapper;
+
+        this.oidcUserService =  new OidcUserService();
     }
 
     /**
@@ -54,13 +68,21 @@ public class KeycloakOauth2UserService extends OidcUserService {
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
 
-        OidcUser user = super.loadUser(userRequest);
+        OidcUser user = oidcUserService.loadUser(userRequest);
 
         Set<GrantedAuthority> authorities = new LinkedHashSet<>();
         authorities.addAll(user.getAuthorities());
+        authorities.addAll(this.findApplicationAuthorities(user));
         authorities.addAll(extractKeycloakAuthorities(userRequest));
 
         return new DefaultOidcUser(authorities, userRequest.getIdToken(), user.getUserInfo(), "preferred_username");
+    }
+
+    private Collection<? extends GrantedAuthority> findApplicationAuthorities(OidcUser user) {
+        return this.applicationAuthoritiesProviders
+                .stream()
+                .flatMap(x->x.findAuthorities(user).stream())
+                .collect(Collectors.toList());
     }
 
     /**

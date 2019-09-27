@@ -10,6 +10,8 @@ package com.keycloak.keycloakteste.configuration;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -29,6 +31,8 @@ public class KeycloakUserDetails implements OidcUser{
     private Map<String, Object> attributes;
     private String name;
 
+    private KeycloakUserDetails(){    }
+
     protected KeycloakUserDetails(DefaultOidcUser user) {
         super();
         this.username = user.getPreferredUsername();
@@ -39,7 +43,15 @@ public class KeycloakUserDetails implements OidcUser{
         this.name = user.getName();
     }
 
-    public static <T extends KeycloakUserDetails> T criaInstanciaDeUsuario(Object user){
+    @SuppressWarnings("unchecked")
+    public static <T extends KeycloakUserDetails> T createUser(Object user){
+        if(user.getClass().isAssignableFrom(UserDetails.class)){
+            KeycloakUserDetails userKeycloak = new KeycloakUserDetails();
+            var userDetails = (UserDetails) user;
+            userKeycloak.authorities = userDetails.getAuthorities();
+            userKeycloak.username = userDetails.getUsername();
+            return (T) userKeycloak;
+        }
         return (T) (user.getClass().isAssignableFrom(DefaultOidcUser.class) ?
                  new KeycloakUserDetails((DefaultOidcUser) user) :
                  user);
