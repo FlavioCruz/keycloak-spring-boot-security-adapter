@@ -10,13 +10,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
 @Slf4j
-public class KeyCloakWebSecurityConfig extends WebSecurityConfigurerAdapter{
+public class KeyCloakWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private KeycloakOauth2UserService keycloakOidcUserService;
 
     @Autowired
     private KeycloakProperties keycloakProperties;
+
     @Override
     public void configure(HttpSecurity http) throws Exception {
 

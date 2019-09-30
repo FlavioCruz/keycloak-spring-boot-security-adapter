@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.keycloak.keycloakteste.configuration.KeycloakOauth2UserService,\
-com.keycloak.keycloakteste.configuration.KeycloakProperties
+com.keycloak.keycloakteste.configuration.KeycloakProperties,\
+org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService

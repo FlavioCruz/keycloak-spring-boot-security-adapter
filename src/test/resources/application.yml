@@ -1,7 +1,7 @@
 keycloak:
 #  base-url: http://200.20.1.158:8080/auth
   base-url: http://localhost:8080/auth
-  realm: SpringBootKeycloak
+  realm: realmName
   realm-url: ${keycloak.base-url}/realms/${keycloak.realm}
 
 spring:
@@ -9,7 +9,7 @@ spring:
     oauth2:
       client:
         registration:
-          SpringBootKeycloak:
+          realmName:
             client-id: client-id
             client-name: client name
             client-secret: 61b4bff5-328f-4811-99ad-32cc06476d13
@@ -19,9 +19,9 @@ spring:
             redirect-uri-template: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
-            authorization-uri: authorization-uri
-            jwk-set-uri: jwk-set-uri
-            token-uri: token-uri
+            authorization-uri: ${keycloak.realm-url}/protocol/openid-connect/auth
+            jwk-set-uri: ${keycloak.realm-url}/protocol/openid-connect/certs
+            token-uri: ${keycloak.realm-url}/protocol/openid-connect/token
             # would be cool if there was a end-session-uri to propagate logouts
 
             #  User info endpoint not needed since Keycloak uses self-contained value tokens

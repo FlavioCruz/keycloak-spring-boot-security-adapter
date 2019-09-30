@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -26,35 +27,40 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Service
 public class KeycloakOauth2UserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
     private final OAuth2Error INVALID_REQUEST = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
 
-    private OidcUserService oidcUserService;
+    private final OidcUserService oidcUserService;
 
-    private JwtDecoder jwtDecoder;
+    private final JwtDecoder jwtDecoder;
 
-    private GrantedAuthoritiesMapper authoritiesMapper;
+    private final GrantedAuthoritiesMapper authoritiesMapper;
 
-    private List<ApplicationAuthoritiesProvider> applicationAuthoritiesProviders;
+    private final List<ApplicationAuthoritiesProvider> applicationAuthoritiesProviders;
 
-    public KeycloakOauth2UserService(OAuth2ClientProperties oauth2ClientProperties, OidcUserService oidcUserService, List<ApplicationAuthoritiesProvider> applicationAuthoritiesProviders){
+    public KeycloakOauth2UserService(OAuth2ClientProperties oauth2ClientProperties,
+                                     OidcUserService oidcUserService,
+                                     List<ApplicationAuthoritiesProvider> applicationAuthoritiesProviders){
         this.jwtDecoder = new NimbusJwtDecoderJwkSupport(
                 oauth2ClientProperties
                         .getProvider()
                         .get("keycloak")
                         .getJwkSetUri()
         );
+
         this.applicationAuthoritiesProviders = applicationAuthoritiesProviders;
 
         SimpleAuthorityMapper authoritiesMapper = new SimpleAuthorityMapper();
         authoritiesMapper.setConvertToUpperCase(true);
         this.authoritiesMapper = authoritiesMapper;
 
-        this.oidcUserService =  new OidcUserService();
+        this.oidcUserService =  oidcUserService;
     }
 
     /**
@@ -94,34 +100,10 @@ public class KeycloakOauth2UserService implements OAuth2UserService<OidcUserRequ
      */
     private Collection<? extends GrantedAuthority> extractKeycloakAuthorities(OidcUserRequest userRequest) {
 
-        Jwt token = parseJwt(userRequest.getAccessToken().getTokenValue());
+        return OidcUserRequestAuthoritiesExtractor.extract(userRequest, authoritiesMapper, this::parseJwt);
 
         // Would be great if Spring Security would provide something like a plugable
         // OidcUserRequestAuthoritiesExtractor interface to hide the junk below...
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> resourceMap = (Map<String, Object>) token.getClaims().get("resource_access");
-        String clientId = userRequest.getClientRegistration().getClientId();
-
-        @SuppressWarnings("unchecked")
-        Map<String, Map<String, Object>> clientResource = (Map<String, Map<String, Object>>) resourceMap.get(clientId);
-        if (CollectionUtils.isEmpty(clientResource)) {
-            return Collections.emptyList();
-        }
-
-        @SuppressWarnings("unchecked")
-        List<String> clientRoles = (List<String>) clientResource.get("roles");
-        if (CollectionUtils.isEmpty(clientRoles)) {
-            return Collections.emptyList();
-        }
-
-        Collection<? extends GrantedAuthority> authorities = AuthorityUtils
-                .createAuthorityList(clientRoles.toArray(new String[0]));
-        if (authoritiesMapper == null) {
-            return authorities;
-        }
-
-        return authoritiesMapper.mapAuthorities(authorities);
     }
 
     private Jwt parseJwt(String accessTokenValue) {
