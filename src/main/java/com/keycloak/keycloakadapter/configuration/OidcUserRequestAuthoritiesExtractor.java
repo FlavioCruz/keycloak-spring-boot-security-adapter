@@ -1,4 +1,4 @@
-package com.keycloak.keycloakteste.configuration;
+package com.keycloak.keycloakadapter.configuration;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;

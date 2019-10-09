@@ -1,4 +1,4 @@
-package com.keycloak.keycloakteste.configuration;
+package com.keycloak.keycloakadapter.configuration;
 
 import lombok.val;
 import org.junit.Test;
@@ -20,8 +20,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;

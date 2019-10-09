@@ -1,9 +1,8 @@
-package com.keycloak.keycloakteste.configuration;
+package com.keycloak.keycloakadapter.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -19,15 +18,11 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -84,6 +79,12 @@ public class KeycloakOauth2UserService implements OAuth2UserService<OidcUserRequ
         return new DefaultOidcUser(authorities, userRequest.getIdToken(), user.getUserInfo(), "preferred_username");
     }
 
+    /**
+     * Finds the Application Authorities inside the {@link OidcUser}
+     *
+     * @param {@link OidcUser} user
+     * @return {@link Collection<? extends GrantedAuthority>}
+     */
     private Collection<? extends GrantedAuthority> findApplicationAuthorities(OidcUser user) {
         return this.applicationAuthoritiesProviders
                 .stream()
@@ -95,17 +96,20 @@ public class KeycloakOauth2UserService implements OAuth2UserService<OidcUserRequ
      * Extracts {@link GrantedAuthority GrantedAuthorities} from the AccessToken in
      * the {@link OidcUserRequest}.
      *
-     * @param userRequest
-     * @return
+     * @param {@link OidcUserRequest} userRequest
+     * @return {@link Collection<? extends GrantedAuthority>}
      */
     private Collection<? extends GrantedAuthority> extractKeycloakAuthorities(OidcUserRequest userRequest) {
 
         return OidcUserRequestAuthoritiesExtractor.extract(userRequest, authoritiesMapper, this::parseJwt);
-
-        // Would be great if Spring Security would provide something like a plugable
-        // OidcUserRequestAuthoritiesExtractor interface to hide the junk below...
     }
 
+    /**
+     * Applies the {@link JwtDecoder} on the Access Token
+     *
+     * @param accessTokenValue
+     * @return {@link Jwt}
+     */
     private Jwt parseJwt(String accessTokenValue) {
         try {
             // Token is already verified by spring security infrastructure

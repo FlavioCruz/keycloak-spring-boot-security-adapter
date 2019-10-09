@@ -6,7 +6,7 @@
  */
 
 
-package com.keycloak.keycloakteste.configuration;
+package com.keycloak.keycloakadapter.configuration;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,14 +45,14 @@ public class KeycloakUserDetails implements OidcUser{
 
     @SuppressWarnings("unchecked")
     public static <T extends KeycloakUserDetails> T createUser(Object user){
-        if(user.getClass().isAssignableFrom(UserDetails.class)){
+        if(UserDetails.class.isAssignableFrom(user.getClass())){
             KeycloakUserDetails userKeycloak = new KeycloakUserDetails();
             var userDetails = (UserDetails) user;
             userKeycloak.authorities = userDetails.getAuthorities();
             userKeycloak.username = userDetails.getUsername();
             return (T) userKeycloak;
         }
-        return (T) (user.getClass().isAssignableFrom(DefaultOidcUser.class) ?
+        return (T) (DefaultOidcUser.class.isAssignableFrom(user.getClass()) ?
                  new KeycloakUserDetails((DefaultOidcUser) user) :
                  user);
     }

@@ -1,8 +1,7 @@
-package com.keycloak.keycloakteste.configuration;
+package com.keycloak.keycloakadapter.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,7 +24,7 @@ public class KeyCloakWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //Configura o gerenciamento da sessão conforme suas necessidades.
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
                 // Aqui pode ser configuradas rotas específicas ou deixar passar tudo
-                .authorizeRequests().anyRequest().permitAll().and()
+//                .authorizeRequests().anyRequest().permitAll().and()
                 // Habilita o OAuth 2 do Spring
                 .oauth2Login().userInfoEndpoint().oidcUserService(keycloakOidcUserService).and()
                 // Redireciona a página de login para a do Keycloak

@@ -18,7 +18,7 @@
 
 
 
-package com.keycloak.keycloakteste.configuration;
+package com.keycloak.keycloakadapter.configuration;
 
 import lombok.Getter;
 import lombok.Setter;

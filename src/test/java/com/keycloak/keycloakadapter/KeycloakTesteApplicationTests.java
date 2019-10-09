@@ -1,4 +1,4 @@
-package com.keycloak.keycloakteste;
+package com.keycloak.keycloakadapter;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
